@@ -1,0 +1,15 @@
+﻿# Git ignore for Flutter
+.dart_tool/
+.idea/
+.packages
+.pub-cache/
+.pub/
+build/
+android/.gradle
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/**/generated/
+*.iml
+*.lock
