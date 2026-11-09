@@ -25,16 +25,17 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Configure Flutter & Scaffold Android Platform
+      - name: Generate Official Android Platform & Permissions
         run: |
-          rm -f android/local.properties
-          flutter create --org com.alone.idsale .
+          rm -rf android
+          flutter create --platforms=android --org com.alone.idsale .
+          chmod +x android/gradlew
           flutter pub get
 
       - name: Build Android Release APK
         run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Upload Release APK Artifact
+      - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
           name: ALONE-ID-SALE-RELEASE-APK
