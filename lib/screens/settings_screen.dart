@@ -402,7 +402,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 10),
             TextField(controller: phoneCtrl, decoration: const InputDecoration(labelText: 'Contact Phone')),
             const SizedBox(height: 10),
-            TextField(controller: currCtrl, decoration: const InputDecoration(labelText: 'Currency Symbol (Rs., $, etc.)')),
+            TextField(controller: currCtrl, decoration: const InputDecoration(labelText: 'Currency Symbol (Rs., USD, etc.)')),
           ],
         ),
         actions: [

@@ -28,27 +28,22 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Generate Official Android Platform
+      - name: Generate Official Android & Web Platforms
         run: |
-          rm -rf android
-          flutter create --platforms=android --org com.alone.idsale .
+          rm -rf android web
+          flutter create --platforms=android,web --org com.alone.idsale .
+          rm -f test/widget_test.dart
           chmod +x android/gradlew
           flutter pub get
 
       - name: Verify Code Quality & Analyze
-        run: |
-          flutter analyze > /tmp/analyze_output.txt 2>&1 || true
-          cat /tmp/analyze_output.txt
-          cp /tmp/analyze_output.txt ./analyze_output.txt
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add analyze_output.txt
-          git commit -m "ci: capture analyze_output.txt [skip ci]" || true
-          git push origin main || true
-          flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
       - name: Build Android Release APK
         run: flutter build apk --release --no-tree-shake-icons
+
+      - name: Build Flutter Web for Live Testing
+        run: flutter build web --release --base-href "/sanchu-app/"
 
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
@@ -66,4 +61,11 @@ jobs:
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy Live Web App to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
+
 
