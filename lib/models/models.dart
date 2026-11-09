@@ -1,4 +1,4 @@
-﻿// Clean models
+// ALONE ID SALE DASHBOARD - Complete Data Models
 
 /// Free Fire Account Inventory Model
 class FreeFireId {
@@ -12,12 +12,15 @@ class FreeFireId {
   String likes;
   List<String> badges;
   String description;
-  List<String> images;
+  List<String> images; // Local paths or URLs
   String currentGmail;
+  String bindType; // 'Gmail' | 'Facebook' | 'Twitter (X)' | 'VK' | 'Apple ID'
   String bindStatus;
   String bindCooldown;
   String sellerName;
   String sellerPhone;
+  double paidToSeller;
+  double pendingToSeller;
   String createdAt;
   String notes;
 
@@ -34,14 +37,19 @@ class FreeFireId {
     this.description = '',
     List<String>? images,
     this.currentGmail = '',
+    this.bindType = 'Gmail',
     this.bindStatus = 'Google / 2FA Ready',
     this.bindCooldown = 'Clean',
     this.sellerName = '',
     this.sellerPhone = '',
+    double? paidToSeller,
+    double? pendingToSeller,
     String? createdAt,
     this.notes = '',
   })  : badges = badges ?? [],
         images = images ?? [],
+        paidToSeller = paidToSeller ?? costPrice,
+        pendingToSeller = pendingToSeller ?? 0.0,
         createdAt = createdAt ?? DateTime.now().toIso8601String();
 
   Map<String, dynamic> toJson() => {
@@ -57,10 +65,13 @@ class FreeFireId {
         'description': description,
         'images': images,
         'currentGmail': currentGmail,
+        'bindType': bindType,
         'bindStatus': bindStatus,
         'bindCooldown': bindCooldown,
         'sellerName': sellerName,
         'sellerPhone': sellerPhone,
+        'paidToSeller': paidToSeller,
+        'pendingToSeller': pendingToSeller,
         'createdAt': createdAt,
         'notes': notes,
       };
@@ -78,10 +89,13 @@ class FreeFireId {
         description: json['description']?.toString() ?? '',
         images: (json['images'] as List?)?.map((e) => e.toString()).toList() ?? [],
         currentGmail: json['currentGmail']?.toString() ?? '',
+        bindType: json['bindType']?.toString() ?? 'Gmail',
         bindStatus: json['bindStatus']?.toString() ?? 'Google / 2FA Ready',
         bindCooldown: json['bindCooldown']?.toString() ?? 'Clean',
         sellerName: json['sellerName']?.toString() ?? '',
         sellerPhone: json['sellerPhone']?.toString() ?? '',
+        paidToSeller: (json['paidToSeller'] as num?)?.toDouble(),
+        pendingToSeller: (json['pendingToSeller'] as num?)?.toDouble(),
         createdAt: json['createdAt']?.toString() ?? DateTime.now().toIso8601String(),
         notes: json['notes']?.toString() ?? '',
       );
@@ -102,6 +116,10 @@ class Sale {
   double remainingDeo;
   String status; // 'Full Paid' | 'Partial'
   String paymentMethod;
+  String bankName;
+  String txnId;
+  String dueDate;
+  double overdueFinePerDay;
   String date;
   String notes;
 
@@ -119,6 +137,10 @@ class Sale {
     double? remainingDeo,
     this.status = 'Full Paid',
     this.paymentMethod = 'GPay / UPI',
+    this.bankName = '',
+    this.txnId = '',
+    this.dueDate = '',
+    this.overdueFinePerDay = 50.0,
     String? date,
     this.notes = '',
   })  : profit = profit ?? (salePrice - costPrice),
@@ -139,6 +161,10 @@ class Sale {
         'remainingDeo': remainingDeo,
         'status': status,
         'paymentMethod': paymentMethod,
+        'bankName': bankName,
+        'txnId': txnId,
+        'dueDate': dueDate,
+        'overdueFinePerDay': overdueFinePerDay,
         'date': date,
         'notes': notes,
       };
@@ -157,6 +183,10 @@ class Sale {
         remainingDeo: (json['remainingDeo'] as num?)?.toDouble(),
         status: json['status']?.toString() ?? 'Full Paid',
         paymentMethod: json['paymentMethod']?.toString() ?? 'GPay / UPI',
+        bankName: json['bankName']?.toString() ?? '',
+        txnId: json['txnId']?.toString() ?? '',
+        dueDate: json['dueDate']?.toString() ?? '',
+        overdueFinePerDay: (json['overdueFinePerDay'] as num?)?.toDouble() ?? 50.0,
         date: json['date']?.toString() ?? '',
         notes: json['notes']?.toString() ?? '',
       );
@@ -211,6 +241,7 @@ class DeoRecord {
   double remainingDeo;
   String status; // 'Active' | 'Settled' | 'Overdue'
   String dueDate;
+  double finePerDay;
   String lastPaymentDate;
   List<DeoPayment> payments;
 
@@ -225,10 +256,25 @@ class DeoRecord {
     double? remainingDeo,
     this.status = 'Active',
     this.dueDate = '',
+    this.finePerDay = 50.0,
     this.lastPaymentDate = '',
     List<DeoPayment>? payments,
   })  : remainingDeo = remainingDeo ?? (totalAmount - paidAmount),
         payments = payments ?? [];
+
+  int get daysOverdue {
+    if (dueDate.isEmpty || status == 'Settled') return 0;
+    try {
+      final due = DateTime.parse(dueDate);
+      final now = DateTime.now();
+      final diff = now.difference(due).inDays;
+      return diff > 0 ? diff : 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  double get overdueFine => daysOverdue * finePerDay;
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -241,6 +287,7 @@ class DeoRecord {
         'remainingDeo': remainingDeo,
         'status': status,
         'dueDate': dueDate,
+        'finePerDay': finePerDay,
         'lastPaymentDate': lastPaymentDate,
         'payments': payments.map((p) => p.toJson()).toList(),
       };
@@ -256,6 +303,7 @@ class DeoRecord {
         remainingDeo: (json['remainingDeo'] as num?)?.toDouble(),
         status: json['status']?.toString() ?? 'Active',
         dueDate: json['dueDate']?.toString() ?? '',
+        finePerDay: (json['finePerDay'] as num?)?.toDouble() ?? 50.0,
         lastPaymentDate: json['lastPaymentDate']?.toString() ?? '',
         payments: (json['payments'] as List?)
                 ?.map((e) => DeoPayment.fromJson(e as Map<String, dynamic>))
@@ -364,6 +412,7 @@ class Buyer {
   String id;
   String name;
   String phone;
+  String whatsapp;
   String address;
   double totalPurchases;
   double totalDeo;
@@ -373,6 +422,7 @@ class Buyer {
     required this.id,
     required this.name,
     this.phone = '',
+    this.whatsapp = '',
     this.address = '',
     this.totalPurchases = 0.0,
     this.totalDeo = 0.0,
@@ -383,6 +433,7 @@ class Buyer {
         'id': id,
         'name': name,
         'phone': phone,
+        'whatsapp': whatsapp,
         'address': address,
         'totalPurchases': totalPurchases,
         'totalDeo': totalDeo,
@@ -393,6 +444,7 @@ class Buyer {
         id: json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
         phone: json['phone']?.toString() ?? '',
+        whatsapp: json['whatsapp']?.toString() ?? '',
         address: json['address']?.toString() ?? '',
         totalPurchases: (json['totalPurchases'] as num?)?.toDouble() ?? 0.0,
         totalDeo: (json['totalDeo'] as num?)?.toDouble() ?? 0.0,
@@ -405,25 +457,43 @@ class Seller {
   String id;
   String name;
   String phone;
+  String bankName;
+  String upiId;
+  String accountNo;
+  String ifsc;
   int totalSupplied;
+  double totalSourcingCost;
   double totalPaid;
+  double pendingBalance;
   String notes;
 
   Seller({
     required this.id,
     required this.name,
     this.phone = '',
+    this.bankName = '',
+    this.upiId = '',
+    this.accountNo = '',
+    this.ifsc = '',
     this.totalSupplied = 0,
+    this.totalSourcingCost = 0.0,
     this.totalPaid = 0.0,
+    double? pendingBalance,
     this.notes = '',
-  });
+  }) : pendingBalance = pendingBalance ?? (totalSourcingCost - totalPaid);
 
   Map<String, dynamic> toJson() => {
         'id': id,
         'name': name,
         'phone': phone,
+        'bankName': bankName,
+        'upiId': upiId,
+        'accountNo': accountNo,
+        'ifsc': ifsc,
         'totalSupplied': totalSupplied,
+        'totalSourcingCost': totalSourcingCost,
         'totalPaid': totalPaid,
+        'pendingBalance': pendingBalance,
         'notes': notes,
       };
 
@@ -431,8 +501,14 @@ class Seller {
         id: json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
         phone: json['phone']?.toString() ?? '',
+        bankName: json['bankName']?.toString() ?? '',
+        upiId: json['upiId']?.toString() ?? '',
+        accountNo: json['accountNo']?.toString() ?? '',
+        ifsc: json['ifsc']?.toString() ?? '',
         totalSupplied: (json['totalSupplied'] as num?)?.toInt() ?? 0,
+        totalSourcingCost: (json['totalSourcingCost'] as num?)?.toDouble() ?? 0.0,
         totalPaid: (json['totalPaid'] as num?)?.toDouble() ?? 0.0,
+        pendingBalance: (json['pendingBalance'] as num?)?.toDouble(),
         notes: json['notes']?.toString() ?? '',
       );
 }
@@ -442,20 +518,31 @@ class BindRecord {
   String id;
   String idRecordId;
   String idName;
-  String gmail;
+  String uid;
+  String bindType; // 'Gmail' | 'Facebook' | 'Twitter (X)' | 'VK' | 'Apple ID'
+  String currentBind;
+  String password;
   String recoveryEmail;
-  String phone;
+  String recoveryPhone;
+  String backupCodes;
   String cooldownDate;
   String status; // 'Secure' | 'Cooldown' | 'Vulnerable' | 'Pending'
   Map<String, bool> securityChecklist;
+
+  String get gmail => currentBind;
+  set gmail(String val) => currentBind = val;
 
   BindRecord({
     required this.id,
     required this.idRecordId,
     required this.idName,
-    this.gmail = '',
+    this.uid = '',
+    this.bindType = 'Gmail',
+    this.currentBind = '',
+    this.password = '',
     this.recoveryEmail = '',
-    this.phone = '',
+    this.recoveryPhone = '',
+    this.backupCodes = '',
     this.cooldownDate = '',
     this.status = 'Secure',
     Map<String, bool>? securityChecklist,
@@ -471,9 +558,13 @@ class BindRecord {
         'id': id,
         'idRecordId': idRecordId,
         'idName': idName,
-        'gmail': gmail,
+        'uid': uid,
+        'bindType': bindType,
+        'currentBind': currentBind,
+        'password': password,
         'recoveryEmail': recoveryEmail,
-        'phone': phone,
+        'recoveryPhone': recoveryPhone,
+        'backupCodes': backupCodes,
         'cooldownDate': cooldownDate,
         'status': status,
         'securityChecklist': securityChecklist,
@@ -483,9 +574,13 @@ class BindRecord {
         id: json['id']?.toString() ?? '',
         idRecordId: json['idRecordId']?.toString() ?? '',
         idName: json['idName']?.toString() ?? '',
-        gmail: json['gmail']?.toString() ?? '',
+        uid: json['uid']?.toString() ?? '',
+        bindType: json['bindType']?.toString() ?? 'Gmail',
+        currentBind: json['currentBind']?.toString() ?? '',
+        password: json['password']?.toString() ?? '',
         recoveryEmail: json['recoveryEmail']?.toString() ?? '',
-        phone: json['phone']?.toString() ?? '',
+        recoveryPhone: json['recoveryPhone']?.toString() ?? '',
+        backupCodes: json['backupCodes']?.toString() ?? '',
         cooldownDate: json['cooldownDate']?.toString() ?? '',
         status: json['status']?.toString() ?? 'Secure',
         securityChecklist: (json['securityChecklist'] as Map<String, dynamic>?)
@@ -503,7 +598,7 @@ class AppSettings {
   String ownerEmail;
 
   AppSettings({
-    this.storeName = 'ALONE ID SALE',
+    this.storeName = 'ALONE ID SALE DASHBOARD',
     this.storePhone = '+91 98765 43210',
     this.currencySymbol = 'Rs.',
     this.reminderTemplate = 'Dear {name}, reminder for Free Fire ID: {idName}. Total balance due: {amount}. Due date: {dueDate}. Please pay soon. Thank you!',
@@ -519,11 +614,10 @@ class AppSettings {
       };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) => AppSettings(
-        storeName: json['storeName']?.toString() ?? 'ALONE ID SALE',
+        storeName: json['storeName']?.toString() ?? 'ALONE ID SALE DASHBOARD',
         storePhone: json['storePhone']?.toString() ?? '+91 98765 43210',
         currencySymbol: json['currencySymbol']?.toString() ?? 'Rs.',
         reminderTemplate: json['reminderTemplate']?.toString() ?? '',
         ownerEmail: json['ownerEmail']?.toString() ?? 'sanchuthan000@gmail.com',
       );
 }
-

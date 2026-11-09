@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme/app_theme.dart';
 import 'dashboard_screen.dart';
@@ -20,6 +20,8 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
   FreeFireId? _preselectedIdForSale;
+  final GlobalKey<IdManagementScreenState> _idKey = GlobalKey<IdManagementScreenState>();
+  final GlobalKey<SalesScreenState> _salesKey = GlobalKey<SalesScreenState>();
 
   void _onQuickSell(FreeFireId id) {
     setState(() {
@@ -31,9 +33,23 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> screens = [
-      DashboardScreen(onNavigateTab: (idx) => setState(() => _currentIndex = idx)),
-      IdManagementScreen(onQuickSell: _onQuickSell),
-      SalesScreen(preselectedId: _preselectedIdForSale),
+      DashboardScreen(
+        onNavigateTab: (idx) => setState(() => _currentIndex = idx),
+        onOpenAddId: () {
+          setState(() => _currentIndex = 1);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _idKey.currentState?.showAddEditIdModal(context);
+          });
+        },
+        onOpenRecordSale: () {
+          setState(() => _currentIndex = 2);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _salesKey.currentState?.showRecordSaleModal(context);
+          });
+        },
+      ),
+      IdManagementScreen(key: _idKey, onQuickSell: _onQuickSell),
+      SalesScreen(key: _salesKey, preselectedId: _preselectedIdForSale),
       const DeoTrackerScreen(),
       const MoneyTrackerScreen(),
     ];

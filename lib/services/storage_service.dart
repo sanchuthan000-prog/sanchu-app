@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../models/models.dart';
@@ -20,11 +20,9 @@ class StorageService extends ChangeNotifier {
   AppSettings settings = AppSettings();
 
   bool isInitialized = false;
-  bool isSyncing = false;
   String syncStatus = 'Offline Ready';
   DateTime? lastSyncTime;
 
-  // Local storage snapshot file path
   String get _localFilePath => 'ff_local_snapshot.json';
 
   Future<void> init() async {
@@ -60,11 +58,15 @@ class StorageService extends ChangeNotifier {
         likes: '14200',
         badges: ['Verified', 'Grandmaster', 'Evo Max'],
         description: 'Elite pass from S2, 7 Max Evo Guns, 2FA ready, instant transfer.',
+        images: ['https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800'],
         currentGmail: 'ffalone.store77@gmail.com',
+        bindType: 'Gmail',
         bindStatus: 'Google / 2FA Ready',
         bindCooldown: 'Clean (0 days)',
         sellerName: 'Vikram Supplier',
         sellerPhone: '+919876543210',
+        paidToSeller: 22000.0,
+        pendingToSeller: 0.0,
       ),
       FreeFireId(
         id: 'ff-102',
@@ -77,11 +79,15 @@ class StorageService extends ChangeNotifier {
         likes: '9850',
         badges: ['Sakura S1', 'Old Season'],
         description: 'Rare OG collector account with original Season 1 pass badge.',
+        images: ['https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800'],
         currentGmail: 'buyer.kavin@gmail.com',
+        bindType: 'Gmail',
         bindStatus: 'Transferred',
         bindCooldown: 'Transferred',
         sellerName: 'Alone Gaming Supplier',
         sellerPhone: '+919876500111',
+        paidToSeller: 15000.0,
+        pendingToSeller: 3000.0,
       ),
       FreeFireId(
         id: 'ff-103',
@@ -94,11 +100,15 @@ class StorageService extends ChangeNotifier {
         likes: '8400',
         badges: ['Blue Dino', 'Poker MP40'],
         description: 'Clean Gmail binding with recovery codes ready for handover.',
+        images: ['https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800'],
         currentGmail: 'ffalone.stock2@gmail.com',
+        bindType: 'Gmail',
         bindStatus: 'Google / 2FA Ready',
         bindCooldown: 'Clean',
         sellerName: 'Vikram Supplier',
         sellerPhone: '+919876543210',
+        paidToSeller: 10500.0,
+        pendingToSeller: 0.0,
       ),
     ];
 
@@ -117,6 +127,10 @@ class StorageService extends ChangeNotifier {
         remainingDeo: 6500.0,
         status: 'Partial',
         paymentMethod: 'GPay',
+        bankName: 'Commercial Bank',
+        txnId: 'TXN-9988231',
+        dueDate: '2026-11-15',
+        overdueFinePerDay: 50.0,
         date: '2026-11-04',
         notes: 'Downpayment 20k, remaining 6.5k due on next Sunday',
       ),
@@ -134,6 +148,7 @@ class StorageService extends ChangeNotifier {
         remainingDeo: 6500.0,
         status: 'Active',
         dueDate: '2026-11-15',
+        finePerDay: 50.0,
         lastPaymentDate: '2026-11-04',
         payments: [
           DeoPayment(
@@ -188,6 +203,7 @@ class StorageService extends ChangeNotifier {
         id: 'b-1',
         name: 'Kavin Kumar',
         phone: '+919876500111',
+        whatsapp: '+919876500111',
         address: 'Chennai, TN',
         totalPurchases: 26500.0,
         totalDeo: 6500.0,
@@ -200,8 +216,14 @@ class StorageService extends ChangeNotifier {
         id: 's-1',
         name: 'Vikram Supplier',
         phone: '+919876543210',
+        bankName: 'State Bank of India',
+        upiId: 'vikram.gamer@oksbi',
+        accountNo: '30981248561',
+        ifsc: 'SBIN0001234',
         totalSupplied: 5,
-        totalPaid: 84000.0,
+        totalSourcingCost: 95000.0,
+        totalPaid: 92000.0,
+        pendingBalance: 3000.0,
         notes: 'Trusted ID seller. All Gmail bindings clean.',
       ),
     ];
@@ -211,35 +233,34 @@ class StorageService extends ChangeNotifier {
         id: 'bind-101',
         idRecordId: 'ff-101',
         idName: 'Grandmaster Lvl 74 · Cobra MP40 Max',
-        gmail: 'ffalone.store77@gmail.com',
+        uid: '1092837461',
+        bindType: 'Gmail',
+        currentBind: 'ffalone.store77@gmail.com',
         recoveryEmail: 'alone.recovery@gmail.com',
-        phone: '+919876543210',
+        recoveryPhone: '+919876543210',
         cooldownDate: '2026-11-12',
         status: 'Secure',
       ),
     ];
   }
 
-  // --- Calculations ---
-  int get totalFreeFireIds => ids.length;
-  int get availableIds => ids.where((e) => e.status.toLowerCase() == 'available').length;
-  int get soldIds => ids.where((e) => e.status.toLowerCase() == 'sold').length;
-
-  double get totalSalesVolume => sales.fold(0.0, (acc, item) => acc + item.salePrice);
-  double get totalInvestment => ids.fold(0.0, (acc, item) => acc + item.costPrice);
-  double get totalSalesProfit => sales.fold(0.0, (acc, item) => acc + item.profit);
-  double get totalOutstandingBalance => sales.fold(0.0, (acc, item) => acc + item.remainingDeo);
-  double get totalDeoBalance => deoTracker.where((d) => d.status != 'Settled').fold(0.0, (acc, item) => acc + item.remainingDeo);
+  // --- Executive Dashboard Metrics ---
+  int get stockAccountsCount => ids.where((e) => e.status.toLowerCase() == 'available').length;
+  int get soldAccountsCount => ids.where((e) => e.status.toLowerCase() == 'sold').length;
+  double get totalSalesRevenue => sales.fold(0.0, (acc, item) => acc + item.salePrice);
+  double get totalNetProfit => sales.fold(0.0, (acc, item) => acc + item.profit);
+  double get pendingCustomerDeo => deoTracker.where((d) => d.status != 'Settled').fold(0.0, (acc, item) => acc + item.remainingDeo);
+  double get pendingSupplierDues => sellers.fold(0.0, (acc, item) => acc + item.pendingBalance);
 
   double get totalPersonalIncome => moneyEntries.where((m) => m.type == 'income').fold(0.0, (acc, item) => acc + item.amount);
   double get totalPersonalExpense => moneyEntries.where((m) => m.type == 'expense').fold(0.0, (acc, item) => acc + item.amount);
   double get netPersonalBalance => totalPersonalIncome - totalPersonalExpense;
 
-  // Total Outstanding for specific DEO customer
+  // Outstanding Grand Total for a specific DEO customer
   double calculateGrandTotalDue(String deoId) {
     final deo = deoTracker.firstWhere((d) => d.id == deoId, orElse: () => DeoRecord(id: '', saleId: '', idName: '', customerName: '', totalAmount: 0, paidAmount: 0));
     final extras = extraPayments.where((e) => e.deoId == deoId).fold(0.0, (sum, e) => sum + e.amount);
-    return deo.remainingDeo + extras;
+    return deo.remainingDeo + extras + deo.overdueFine;
   }
 
   // --- CRUD: Free Fire IDs ---
@@ -266,21 +287,33 @@ class StorageService extends ChangeNotifier {
 
   // --- CRUD: Sales ---
   Future<bool> createSale(Sale sale, {bool linkToMoneyEntries = true}) async {
-    // Prevent duplicate sales for the same account
     final existingSale = sales.any((s) => s.idRecordId == sale.idRecordId);
-    if (existingSale) {
-      return false; // Duplicate sale prevented
-    }
+    if (existingSale) return false;
 
     sales.insert(0, sale);
 
-    // Update ID status to 'Sold'
+    // Update ID status
     final idIndex = ids.indexWhere((item) => item.id == sale.idRecordId);
     if (idIndex != -1) {
       ids[idIndex].status = 'Sold';
     }
 
-    // If partial payment, auto-create DEO Tracker entry
+    // Update Buyer CRM stats
+    final buyerIndex = buyers.indexWhere((b) => b.name.toLowerCase() == sale.buyerName.toLowerCase());
+    if (buyerIndex != -1) {
+      buyers[buyerIndex].totalPurchases += sale.salePrice;
+      buyers[buyerIndex].totalDeo += sale.remainingDeo;
+    } else {
+      buyers.add(Buyer(
+        id: 'b-${DateTime.now().millisecondsSinceEpoch}',
+        name: sale.buyerName,
+        phone: sale.buyerPhone,
+        totalPurchases: sale.salePrice,
+        totalDeo: sale.remainingDeo,
+      ));
+    }
+
+    // Create DEO Tracker entry if balance due exists
     if (sale.remainingDeo > 0) {
       final deo = DeoRecord(
         id: 'deo-${DateTime.now().millisecondsSinceEpoch}',
@@ -292,7 +325,8 @@ class StorageService extends ChangeNotifier {
         paidAmount: sale.paidAmount,
         remainingDeo: sale.remainingDeo,
         status: 'Active',
-        dueDate: DateTime.now().add(const Duration(days: 7)).toIso8601String().substring(0, 10),
+        dueDate: sale.dueDate.isNotEmpty ? sale.dueDate : DateTime.now().add(const Duration(days: 7)).toIso8601String().substring(0, 10),
+        finePerDay: sale.overdueFinePerDay,
         lastPaymentDate: sale.date,
         payments: [
           DeoPayment(
@@ -300,14 +334,14 @@ class StorageService extends ChangeNotifier {
             amount: sale.paidAmount,
             date: sale.date,
             paymentMethod: sale.paymentMethod,
-            notes: 'Initial downpayment on sale',
+            notes: 'Initial downpayment on deal',
           ),
         ],
       );
       deoTracker.insert(0, deo);
     }
 
-    // Profit-Only Money Control Rule:
+    // Profit-only sync with confirmation
     if (linkToMoneyEntries) {
       upsertSaleProfit(sale);
     }
@@ -402,7 +436,92 @@ class StorageService extends ChangeNotifier {
     notifyListeners();
   }
 
-  // --- Backup & Restore JSON ---
+  // --- CRUD: Contacts & Suppliers ---
+  Future<void> addBuyer(Buyer buyer) async {
+    buyers.insert(0, buyer);
+    await saveToLocal();
+    notifyListeners();
+  }
+
+  Future<void> updateBuyer(Buyer updated) async {
+    final index = buyers.indexWhere((b) => b.id == updated.id);
+    if (index != -1) {
+      buyers[index] = updated;
+      await saveToLocal();
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteBuyer(String id) async {
+    buyers.removeWhere((b) => b.id == id);
+    await saveToLocal();
+    notifyListeners();
+  }
+
+  Future<void> addSeller(Seller seller) async {
+    sellers.insert(0, seller);
+    await saveToLocal();
+    notifyListeners();
+  }
+
+  Future<void> updateSeller(Seller updated) async {
+    final index = sellers.indexWhere((s) => s.id == updated.id);
+    if (index != -1) {
+      sellers[index] = updated;
+      await saveToLocal();
+      notifyListeners();
+    }
+  }
+
+  Future<void> deleteSeller(String id) async {
+    sellers.removeWhere((s) => s.id == id);
+    await saveToLocal();
+    notifyListeners();
+  }
+
+  Future<void> recordSupplierPayout(String sellerId, double payoutAmount, {String notes = ''}) async {
+    final index = sellers.indexWhere((s) => s.id == sellerId);
+    if (index != -1) {
+      final s = sellers[index];
+      s.totalPaid += payoutAmount;
+      s.pendingBalance = (s.totalSourcingCost - s.totalPaid).clamp(0.0, double.infinity);
+
+      // Record in Personal Money as Business Expense
+      moneyEntries.insert(0, MoneyEntry(
+        id: 'payout-${DateTime.now().millisecondsSinceEpoch}',
+        type: 'expense',
+        title: 'Supplier Payout · ${s.name}',
+        category: 'Business',
+        amount: payoutAmount,
+        date: DateTime.now().toIso8601String().substring(0, 10),
+        time: '12:00',
+        notes: notes.isNotEmpty ? notes : 'Paid towards supplier balance',
+      ));
+
+      await saveToLocal();
+      notifyListeners();
+    }
+  }
+
+  // --- CRUD: Binds ---
+  Future<void> updateBind(BindRecord updated) async {
+    final index = binds.indexWhere((b) => b.id == updated.id);
+    if (index != -1) {
+      binds[index] = updated;
+    } else {
+      binds.insert(0, updated);
+    }
+    await saveToLocal();
+    notifyListeners();
+  }
+
+  Future<void> deleteBind(String id) async {
+    binds.removeWhere((b) => b.id == id);
+    await saveToLocal();
+    notifyListeners();
+  }
+
+  // --- Snapshot Backup & Restore ---
   Map<String, dynamic> exportFullSnapshot() {
     return {
       'id': 'main',
@@ -423,34 +542,15 @@ class StorageService extends ChangeNotifier {
 
   void loadFromJson(Map<String, dynamic> json) {
     final data = json['data'] is Map<String, dynamic> ? json['data'] : json;
-
-    if (data['ids'] is List) {
-      ids = (data['ids'] as List).map((e) => FreeFireId.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['sales'] is List) {
-      sales = (data['sales'] as List).map((e) => Sale.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['deoTracker'] is List) {
-      deoTracker = (data['deoTracker'] as List).map((e) => DeoRecord.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['extraPayments'] is List) {
-      extraPayments = (data['extraPayments'] as List).map((e) => ExtraPayment.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['moneyEntries'] is List) {
-      moneyEntries = (data['moneyEntries'] as List).map((e) => MoneyEntry.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['buyers'] is List) {
-      buyers = (data['buyers'] as List).map((e) => Buyer.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['sellers'] is List) {
-      sellers = (data['sellers'] as List).map((e) => Seller.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['binds'] is List) {
-      binds = (data['binds'] as List).map((e) => BindRecord.fromJson(e as Map<String, dynamic>)).toList();
-    }
-    if (data['settings'] is Map<String, dynamic>) {
-      settings = AppSettings.fromJson(data['settings']);
-    }
+    if (data['ids'] is List) ids = (data['ids'] as List).map((e) => FreeFireId.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['sales'] is List) sales = (data['sales'] as List).map((e) => Sale.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['deoTracker'] is List) deoTracker = (data['deoTracker'] as List).map((e) => DeoRecord.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['extraPayments'] is List) extraPayments = (data['extraPayments'] as List).map((e) => ExtraPayment.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['moneyEntries'] is List) moneyEntries = (data['moneyEntries'] as List).map((e) => MoneyEntry.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['buyers'] is List) buyers = (data['buyers'] as List).map((e) => Buyer.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['sellers'] is List) sellers = (data['sellers'] as List).map((e) => Seller.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['binds'] is List) binds = (data['binds'] as List).map((e) => BindRecord.fromJson(e as Map<String, dynamic>)).toList();
+    if (data['settings'] is Map<String, dynamic>) settings = AppSettings.fromJson(data['settings']);
     notifyListeners();
   }
 
@@ -460,7 +560,7 @@ class StorageService extends ChangeNotifier {
       final file = File(_localFilePath);
       await file.writeAsString(jsonEncode(snapshot));
       lastSyncTime = DateTime.now();
-      syncStatus = 'Synced Locally';
+      syncStatus = 'Saved';
     } catch (e) {
       debugPrint('Error saving local snapshot: $e');
     }

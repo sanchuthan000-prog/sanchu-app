@@ -1,4 +1,4 @@
-﻿name: Build Release APK
+name: Build Release APK
 
 on:
   push:
@@ -30,6 +30,7 @@ jobs:
           rm -rf android
           flutter create --platforms=android --org com.alone.idsale .
           chmod +x android/gradlew
+          sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET"/>\n    <queries>\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <data android:scheme="https" />\n        </intent>\n        <intent>\n            <action android:name="android.intent.action.DIAL" />\n            <data android:scheme="tel" />\n        </intent>\n        <package android:name="com.whatsapp" />\n        <package android:name="com.whatsapp.w4b" />\n    </queries>' android/app/src/main/AndroidManifest.xml
           flutter pub get
 
       - name: Build Android Release APK
