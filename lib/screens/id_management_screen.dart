@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../models/models.dart';
 import '../services/storage_service.dart';
@@ -281,25 +281,63 @@ class IdManagementScreenState extends State<IdManagementScreen> {
                   const SizedBox(height: 8),
                 ],
 
-                // Pricing Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Selling Price', style: TextStyle(color: AppTheme.textMuted, fontSize: 10)),
-                        Text('$currency ${item.price.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue, fontSize: 14)),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        const Text('Exp. Profit', style: TextStyle(color: AppTheme.textMuted, fontSize: 10)),
-                        Text('+Rs. ${expectedProfit.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.emeraldGreen, fontSize: 12)),
-                      ],
-                    ),
-                  ],
+                // Sourcing & Supplier info
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  margin: const EdgeInsets.only(bottom: 6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.storefront, size: 12, color: AppTheme.neonAmber),
+                          const SizedBox(width: 4),
+                          Text('Supplier: ${item.sellerName}', style: const TextStyle(color: AppTheme.textSecondary, fontSize: 10)),
+                        ],
+                      ),
+                      Text(item.currentGmail.isNotEmpty ? item.currentGmail : 'No Bind', style: const TextStyle(color: AppTheme.textMuted, fontSize: 10)),
+                    ],
+                  ),
+                ),
+
+                // Pricing Row: Cost Price | Customer Price | Profit
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceLight.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.dividerColor),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Cost / Buy Price', style: TextStyle(color: AppTheme.textMuted, fontSize: 9)),
+                          Text('$currency ${item.costPrice.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.roseRed, fontSize: 12)),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text('Customer Price', style: TextStyle(color: AppTheme.textMuted, fontSize: 9)),
+                          Text('$currency ${item.price.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.neonCyan, fontSize: 13)),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text('Profit', style: TextStyle(color: AppTheme.textMuted, fontSize: 9)),
+                          Text('+Rs. ${expectedProfit.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.emeraldGreen, fontSize: 12)),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
 
                 if (!isCompact) ...[
@@ -414,17 +452,47 @@ class IdManagementScreenState extends State<IdManagementScreen> {
 
                   Row(
                     children: [
-                      Expanded(child: TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Selling Price (Rs.) *'))),
-                      const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
                           controller: costCtrl,
                           keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(labelText: 'Sourcing Cost (Rs.) *'),
+                          decoration: const InputDecoration(labelText: 'Buying / Cost Price (Rs.) *'),
+                          onChanged: (_) => setModalState(() {}),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          controller: priceCtrl,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(labelText: 'Customer Selling Price (Rs.) *'),
                           onChanged: (_) => setModalState(() {}),
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceLight,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppTheme.dividerColor),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Expected Margin / Profit:', style: TextStyle(fontSize: 12, color: AppTheme.textMuted)),
+                        Text(
+                          'Rs. ${((double.tryParse(priceCtrl.text) ?? 0.0) - (double.tryParse(costCtrl.text) ?? 0.0)) >= 0 ? "+" : ""}${((double.tryParse(priceCtrl.text) ?? 0.0) - (double.tryParse(costCtrl.text) ?? 0.0)).toStringAsFixed(0)}',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                            color: ((double.tryParse(priceCtrl.text) ?? 0.0) - (double.tryParse(costCtrl.text) ?? 0.0)) >= 0 ? AppTheme.emeraldGreen : AppTheme.roseRed,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 10),
 

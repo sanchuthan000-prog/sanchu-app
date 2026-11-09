@@ -5,10 +5,10 @@ import 'dashboard_screen.dart';
 import 'id_management_screen.dart';
 import 'sales_screen.dart';
 import 'deo_tracker_screen.dart';
-import 'money_tracker_screen.dart';
-import 'binds_screen.dart';
 import 'buyers_sellers_screen.dart';
+import 'money_tracker_screen.dart';
 import 'settings_screen.dart';
+import 'binds_screen.dart';
 
 class MainLayout extends StatefulWidget {
   const MainLayout({Key? key}) : super(key: key);
@@ -47,11 +47,18 @@ class _MainLayoutState extends State<MainLayout> {
             _salesKey.currentState?.showRecordSaleModal(context);
           });
         },
+        onOpenAddCustomer: () => BuyersSellersScreen.showAddEditBuyerModal(context),
+        onOpenAddSeller: () => BuyersSellersScreen.showAddEditSellerModal(context),
+        onOpenExportJson: () => SettingsScreen.exportJsonBackup(context),
+        onOpenImportJson: () => SettingsScreen.showImportJsonDialog(context),
+        onOpenBinds: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const BindsScreen())),
       ),
       IdManagementScreen(key: _idKey, onQuickSell: _onQuickSell),
       SalesScreen(key: _salesKey, preselectedId: _preselectedIdForSale),
       const DeoTrackerScreen(),
+      const BuyersSellersScreen(),
       const MoneyTrackerScreen(),
+      const SettingsScreen(),
     ];
 
     return Scaffold(
@@ -122,11 +129,27 @@ class _MainLayoutState extends State<MainLayout> {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.people_outline, color: AppTheme.neonCyan),
+              title: const Text('Customers & Suppliers (CRM)'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 4);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.account_balance_wallet_outlined, color: AppTheme.neonGreen),
               title: const Text('Personal Money Control'),
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _currentIndex = 4);
+                setState(() => _currentIndex = 5);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.backup_outlined, color: AppTheme.neonAmber),
+              title: const Text('Backup & JSON Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentIndex = 6);
               },
             ),
             const Divider(color: AppTheme.dividerColor),
@@ -138,22 +161,6 @@ class _MainLayoutState extends State<MainLayout> {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const BindsScreen()));
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.people_outline, color: AppTheme.primaryCyan),
-              title: const Text('Buyers & Suppliers'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const BuyersSellersScreen()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined, color: AppTheme.textSecondary),
-              title: const Text('Settings & Backup'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
-              },
-            ),
           ],
         ),
       ),
@@ -163,6 +170,12 @@ class _MainLayoutState extends State<MainLayout> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: AppTheme.surface,
+        selectedItemColor: AppTheme.neonCyan,
+        unselectedItemColor: AppTheme.textMuted,
+        selectedFontSize: 10,
+        unselectedFontSize: 9,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
@@ -181,8 +194,8 @@ class _MainLayoutState extends State<MainLayout> {
             label: 'IDs',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_shopping_cart_outlined),
-            activeIcon: Icon(Icons.add_shopping_cart),
+            icon: Icon(Icons.shopping_cart_outlined),
+            activeIcon: Icon(Icons.shopping_cart),
             label: 'Sales',
           ),
           BottomNavigationBarItem(
@@ -191,9 +204,19 @@ class _MainLayoutState extends State<MainLayout> {
             label: 'DEO',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.people_outline),
+            activeIcon: Icon(Icons.people),
+            label: 'CRM',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet_outlined),
             activeIcon: Icon(Icons.account_balance_wallet),
             label: 'Money',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.backup_outlined),
+            activeIcon: Icon(Icons.backup),
+            label: 'Backup',
           ),
         ],
       ),

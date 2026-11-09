@@ -95,9 +95,9 @@ class _BuyersSellersScreenState extends State<BuyersSellersScreen> with SingleTi
             ),
             onPressed: () {
               if (_tabController.index == 0) {
-                _showAddEditBuyerModal(context);
+                showAddEditBuyerModal(context);
               } else {
-                _showAddEditSellerModal(context);
+                showAddEditSellerModal(context);
               }
             },
           ),
@@ -237,7 +237,7 @@ class _BuyersSellersScreenState extends State<BuyersSellersScreen> with SingleTi
                                   children: [
                                     TextButton(
                                       child: const Text('Edit', style: TextStyle(color: AppTheme.textSecondary, fontSize: 12)),
-                                      onPressed: () => _showAddEditBuyerModal(context, buyerItem: buyer),
+                                      onPressed: () => showAddEditBuyerModal(context, buyerItem: buyer),
                                     ),
                                     TextButton(
                                       child: const Text('Delete', style: TextStyle(color: AppTheme.roseRed, fontSize: 12)),
@@ -459,7 +459,7 @@ class _BuyersSellersScreenState extends State<BuyersSellersScreen> with SingleTi
                                     const SizedBox(width: 6),
                                     IconButton(
                                       icon: const Icon(Icons.edit, size: 16, color: AppTheme.textSecondary),
-                                      onPressed: () => _showAddEditSellerModal(context, sellerItem: seller),
+                                      onPressed: () => showAddEditSellerModal(context, sellerItem: seller),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.delete_outline, size: 16, color: AppTheme.roseRed),
@@ -501,7 +501,7 @@ class _BuyersSellersScreenState extends State<BuyersSellersScreen> with SingleTi
   }
 
   // --- MODALS ---
-  void _showAddEditBuyerModal(BuildContext context, {Buyer? buyerItem}) {
+  static void showAddEditBuyerModal(BuildContext context, {Buyer? buyerItem}) {
     final isEdit = buyerItem != null;
     final nameCtrl = TextEditingController(text: buyerItem?.name ?? '');
     final phoneCtrl = TextEditingController(text: buyerItem?.phone ?? '');
@@ -575,7 +575,7 @@ class _BuyersSellersScreenState extends State<BuyersSellersScreen> with SingleTi
     );
   }
 
-  void _showAddEditSellerModal(BuildContext context, {Seller? sellerItem}) {
+  static void showAddEditSellerModal(BuildContext context, {Seller? sellerItem}) {
     final isEdit = sellerItem != null;
     final nameCtrl = TextEditingController(text: sellerItem?.name ?? '');
     final phoneCtrl = TextEditingController(text: sellerItem?.phone ?? '');
