@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class AppTheme {
   // Dark/Navy Gaming Palette
@@ -11,9 +11,13 @@ class AppTheme {
   // Accents as specified
   static const Color primaryBlue = Color(0xFF2563EB); // #2563EB for primary actions
   static const Color neonCyan = Color(0xFF00E5FF);
+  static const Color primaryCyan = Color(0xFF00E5FF);
   static const Color emeraldGreen = Color(0xFF10B981); // #10B981 for Income & Profits
+  static const Color neonGreen = Color(0xFF10B981);
   static const Color roseRed = Color(0xFFEF4444); // #EF4444 for Expenses & Losses
+  static const Color neonRed = Color(0xFFEF4444);
   static const Color amberWarning = Color(0xFFF59E0B); // #F59E0B for Dues/Warnings
+  static const Color neonAmber = Color(0xFFF59E0B);
 
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
