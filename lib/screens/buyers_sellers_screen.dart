@@ -8,6 +8,12 @@ import '../theme/app_theme.dart';
 class BuyersSellersScreen extends StatefulWidget {
   const BuyersSellersScreen({Key? key}) : super(key: key);
 
+  static void showAddEditBuyerModal(BuildContext context, {Buyer? buyerItem}) =>
+      _BuyersSellersScreenState.showAddEditBuyerModal(context, buyerItem: buyerItem);
+
+  static void showAddEditSellerModal(BuildContext context, {Seller? sellerItem}) =>
+      _BuyersSellersScreenState.showAddEditSellerModal(context, sellerItem: sellerItem);
+
   @override
   State<BuyersSellersScreen> createState() => _BuyersSellersScreenState();
 }

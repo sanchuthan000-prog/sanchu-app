@@ -144,7 +144,7 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           _buildKpiCard(
                             'Stock Accounts',
-                            ' IDs',
+                            '${storage.stockAccountsCount} IDs',
                             'Available in store',
                             Icons.shield_outlined,
                             AppTheme.neonCyan,
@@ -152,15 +152,15 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           _buildKpiCard(
                             'Total Sales Revenue',
-                            ' ',
-                            ' Accounts Sold',
+                            '$currency ${storage.totalSalesRevenue.toStringAsFixed(0)}',
+                            '${storage.soldAccountsCount} Accounts Sold',
                             Icons.shopping_bag_outlined,
                             AppTheme.emeraldGreen,
                             () => onNavigateTab(2),
                           ),
                           _buildKpiCard(
                             'Pending Customer DEO',
-                            ' ',
+                            '$currency ${storage.pendingCustomerDeo.toStringAsFixed(0)}',
                             'Credit receivable',
                             Icons.schedule,
                             AppTheme.amberWarning,
@@ -168,8 +168,8 @@ class DashboardScreen extends StatelessWidget {
                           ),
                           _buildKpiCard(
                             'CRM Contacts',
-                            ' Buyers',
-                            ' Suppliers',
+                            '${storage.buyers.length} Buyers',
+                            '${storage.sellers.length} Suppliers',
                             Icons.people_outline,
                             AppTheme.primaryBlue,
                             () => onNavigateTab(4),
@@ -313,14 +313,14 @@ class DashboardScreen extends StatelessWidget {
                                     Text(deo.customerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                                     const SizedBox(height: 2),
                                     Text(
-                                      ' days late · Account: ',
+                                      '${deo.daysOverdue} days late · Account: ${deo.idName}',
                                       style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
                                     ),
                                   ],
                                 ),
                                 Row(
                                   children: [
-                                    Text(' ', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.roseRed, fontSize: 14)),
+                                    Text('$currency ${totalDue.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.roseRed, fontSize: 14)),
                                     const SizedBox(width: 8),
                                     IconButton(
                                       icon: const Icon(Icons.send, color: AppTheme.emeraldGreen, size: 20),
@@ -373,15 +373,15 @@ class DashboardScreen extends StatelessWidget {
                                       children: [
                                         Text(s.idName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
                                         const SizedBox(height: 3),
-                                        Text('Buyer:  · ', style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
+                                        Text('Buyer: ${s.buyerName} · ${s.paymentMethod}', style: const TextStyle(color: AppTheme.textMuted, fontSize: 11)),
                                       ],
                                     ),
                                   ),
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      Text(' ', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 14)),
-                                      Text('+Rs.  profit', style: const TextStyle(color: AppTheme.emeraldGreen, fontSize: 11, fontWeight: FontWeight.bold)),
+                                      Text('$currency ${s.salePrice.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.textPrimary, fontSize: 14)),
+                                      Text('+Rs. ${s.profit.toStringAsFixed(0)} profit', style: const TextStyle(color: AppTheme.emeraldGreen, fontSize: 11, fontWeight: FontWeight.bold)),
                                     ],
                                   ),
                                 ],

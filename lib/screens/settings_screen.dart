@@ -14,7 +14,7 @@ class SettingsScreen extends StatefulWidget {
     final snapshot = storage.exportFullSnapshot();
     final jsonStr = const JsonEncoder.withIndent('  ').convert(snapshot);
     final bytes = Uint8List.fromList(utf8.encode(jsonStr));
-    final fileName = 'alone_id_sale_backup_.json';
+    final fileName = 'alone_id_sale_backup_${DateTime.now().millisecondsSinceEpoch}.json';
 
     try {
       await Share.shareXFiles(
@@ -226,13 +226,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        _buildStatChip('🎮  Free Fire IDs', AppTheme.primaryBlue),
-                        _buildStatChip('👥  Customers / Buyers', AppTheme.emeraldGreen),
-                        _buildStatChip('🏬  Suppliers / Sellers', AppTheme.neonAmber),
-                        _buildStatChip('🛒  Sales Deals', AppTheme.emeraldGreen),
-                        _buildStatChip('⏰  DEO Credits', AppTheme.roseRed),
-                        _buildStatChip('💵  Money Entries', AppTheme.neonCyan),
-                        _buildStatChip('🔒  Account Binds', AppTheme.primaryBlue),
+                        _buildStatChip('🎮 ${storage.ids.length} Free Fire IDs', AppTheme.primaryBlue),
+                        _buildStatChip('👥 ${storage.buyers.length} Customers / Buyers', AppTheme.emeraldGreen),
+                        _buildStatChip('🏬 ${storage.sellers.length} Suppliers / Sellers', AppTheme.neonAmber),
+                        _buildStatChip('🛒 ${storage.sales.length} Sales Deals', AppTheme.emeraldGreen),
+                        _buildStatChip('⏰ ${storage.deoTracker.length} DEO Credits', AppTheme.roseRed),
+                        _buildStatChip('💵 ${storage.moneyEntries.length} Money Entries', AppTheme.neonCyan),
+                        _buildStatChip('🔒 ${storage.binds.length} Account Binds', AppTheme.primaryBlue),
                       ],
                     ),
                   ],
@@ -341,10 +341,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    Text('Auto-Save Status: ', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13)),
+                    Text('Auto-Save Status: ${storage.syncStatus}', style: const TextStyle(color: AppTheme.textPrimary, fontSize: 13)),
                     const SizedBox(height: 4),
                     Text(
-                      'Last Saved: ',
+                      'Last Saved: ${storage.lastSyncTime != null ? storage.lastSyncTime.toString().substring(0, 19) : "Active"}',
                       style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
                     ),
                     const SizedBox(height: 12),
